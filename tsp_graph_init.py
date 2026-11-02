@@ -32,8 +32,22 @@ class Affichage:
         self.afficher_details = False
 
         self.master.bind('<g>', self.best_routes) #'g' pour gris clair (c'est évident)
-        self.master.bind('<m>', self.matrice) #'m' pour matrice (espèce de bouffon)
+        self.master.bind('<m>', self.pheromones) #'m' pour matrice (espèce de bouffon)
     
 
     def quitter(self, event=None):
         self.master.destroy() #ferme l'interface graphique complètement
+        self.master.quit() #arrête la boucle principale de tkinter
+    
+    def pheromones(self, event=None):
+        #affiche ou désaffiche les détails des phéromones sur le graphe
+        self.affichage_details = not self.affichage_details
+        print("bascule affichage des détails des phéromones:", self.affichage_details) #faudra relancer un canva dans le main
+
+    def mettre_a_jour_texte(self, iteration, best_distance, infos_supplementaire="")
+        #mettre à jour le texte en bas de la fenêtre
+        texte = f"Iteration: {iteration} | Meilleure distance: {best_distance:.2f} | {infos_supplementaire}"
+        self.info_label.config(text=texte)
+    
+    def dessiner_lieux(self, liste_lieux):
+        
