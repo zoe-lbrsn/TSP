@@ -8,3 +8,32 @@ class LIEU:
     def distance(self, autre_lieu):
         return (self.x - autre_lieu.x, self.y - autre_lieu.y)
 
+
+import tkinter as tk
+HAUTEUR = 600
+LARGEUR = 800
+
+class Affichage:
+    def __init__(self, master, group_name="6"):
+        self.master = master
+        self.master.title(f"TSP - Groupe {group_name}")
+
+        self.canvas = tk.Canvas(self.master, width=LARGEUR, height=HAUTEUR, bg='white')
+        self.canvas.pack()
+
+        self.info_label = tk.Label(
+            self.master,
+            text='Initialisation du graphe du TSP',
+            font=('Arial', 12)
+            fg='black'
+        )
+        self.info_label.pack()
+
+        self.afficher_details = False
+
+        self.master.bind('<g>', self.best_routes) #'g' pour gris clair (c'est évident)
+        self.master.bind('<m>', self.matrice) #'m' pour matrice (espèce de bouffon)
+    
+
+    def quitter(self, event=None):
+        self.master.destroy() #ferme l'interface graphique complètement
