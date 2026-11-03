@@ -31,7 +31,8 @@ class Affichage:
 
         self.afficher_details = False
 
-        self.master.bind('<g>', self.best_routes) #'g' pour gris clair (c'est évident)
+        #on écoute le clavier grace à bind
+        self.master.bind('<Escape>', self.quitter) #touche "echap" pour quitter
         self.master.bind('<m>', self.pheromones) #'m' pour matrice (espèce de bouffon)
     
 
