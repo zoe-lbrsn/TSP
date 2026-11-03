@@ -5,8 +5,8 @@ class LIEU:
         self.y = y
         self.name = name
 
-    def distance(self, autre_lieu):
-        return (self.x - autre_lieu.x, self.y - autre_lieu.y)
+    def distance(self, autre_lieu): #c'est euclidien donc renvoie qu'un nombre pas un tuple
+        return ((self.x - autre_lieu.x)**2 + (self.y - autre_lieu.y)**2)**0.5
 
 
 import tkinter as tk
@@ -24,7 +24,7 @@ class Affichage:
         self.info_label = tk.Label(
             self.master,
             text='Initialisation du graphe du TSP',
-            font=('Arial', 12)
+            font=('Arial', 12),
             fg='black'
         )
         self.info_label.pack()
@@ -42,12 +42,12 @@ class Affichage:
     
     def pheromones(self, event=None):
         #affiche ou désaffiche les détails des phéromones sur le graphe
-        self.affichage_details = not self.affichage_details
-        print("bascule affichage des détails des phéromones:", self.affichage_details) #faudra relancer un canva dans le main
+        self.afficher_details = not self.afficher_details
+        print("bascule affichage des détails des phéromones:", self.afficher_details) #faudra relancer un canva dans le main
 
-    def mettre_a_jour_texte(self, iteration, best_distance, infos_supplementaire="")
+    def mettre_a_jour_texte(self, iteration, best_distance, iteration_trouvee)
         #mettre à jour le texte en bas de la fenêtre
-        texte = f"Iteration: {iteration} | Meilleure distance: {best_distance:.2f} | {infos_supplementaire}"
+        texte = f"Iteration en cours: {iteration} | Meilleure distance: {best_distance:.2f} trouvée à l'itération: {iteration_trouvee}"
         self.info_label.config(text=texte)
     
     def dessiner_lieux(self, liste_lieux):
@@ -59,7 +59,7 @@ class Affichage:
             #cercle qui représente le lieu
             self.canvas.create_oval(
                 x - rayon, y - rayon, x + rayon, y + rayon,
-                fill='lightpurple',
+                fill='plum', #essayer thistle comme couleur aussi
                 outline='black'
             )
 
@@ -115,7 +115,7 @@ class Affichage:
                     l2 = liste_lieux[j]
 
                     #Plus il y a de phéromones, plus la ligne est épaisse
-                    epaisseur = min(5, max(1, niveau_pheromone * 100))  # Limite l'épaisseur à 5
+                    epaisseur = int(min(5, max(1, niveau_pheromone * 100)))  # Limite l'épaisseur à 5
                     self.canvas.create_line(
                         l1.x, l1.y, l2.x, l2.y,
                         fill='lightgray',
@@ -130,7 +130,7 @@ class Affichage:
         self.canvas.delete("all")
 
         #on dessine les phéromones en arrière-plan si la touche "m" a été pressée
-        if self.affichage_details and matrice_pheromones is not None:
+        if self.afficher_details and matrice_pheromones is not None:
             self.dessiner_pheromones(matrice_pheromones, liste_lieux)
         
         #on dessine la route par dessus
