@@ -7,7 +7,7 @@ import pandas as pd
 LARGEUR = 800
 HAUTEUR = 600
 NB_LIEUX = 10
-
+ 
 
 class Graph:
     # Variables de classe si nécessaire
