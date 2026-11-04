@@ -31,6 +31,12 @@ def __lt__(self, autre_route):
     return self.distance_totale < autre_route.distance_totale
 __repr__ = __str__
 
+    __lt__(self, other): # méthode pour comparer deux routes en fonction de leur distance totale
+
+    __repr__(self): # méthode pour représenter la route sous forme de chaîne de caractères
+
+    
+
 
 
 # Constantes globales requises par la consigne
