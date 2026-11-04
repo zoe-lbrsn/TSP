@@ -27,6 +27,12 @@ class Route: # classe route qui représente un chemin dans le problème du voyag
         self.ordre.append(0) # insérer le point d'arrivée (indice 0) à la fin de la liste des lieux à visiter
 
 
+    __lt__(self, other): # méthode pour comparer deux routes en fonction de leur distance totale
+
+    __repr__(self): # méthode pour représenter la route sous forme de chaîne de caractères
+
+    
+
 
 
 # Constantes globales requises par la consigne

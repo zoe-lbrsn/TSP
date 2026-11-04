@@ -11,7 +11,7 @@ if __name__ == "__main__":
     graphe_test = Graph(liste_lieux=[]) 
     
     # 2. Chargement des données depuis votre fichier CSV
-    graphe_test.charger_graph("graph_5.csv")
+    graphe_test.charger_graph("graph_20.csv")
     
     # 3. Initialisation de l'affichage
     affichage_test = Affichage(root)
