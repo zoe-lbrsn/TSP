@@ -59,7 +59,7 @@ class Graph:
             LIEU(
                 random.uniform(marge, LARGEUR - marge),
                 random.uniform(marge, HAUTEUR - marge),
-                nom=f"Lieu_{i}"
+                name=f"LIEU_{i}"
             )
             for i in range(nb_lieux)
         ]
@@ -110,7 +110,7 @@ class Graph:
         try:
             df = pd.read_csv(fichier_csv)
             for i, row in df.iterrows():
-                nom = str(row['nom']) if 'nom' in df.columns else f"Lieu_{i}"
+                nom = str(row['nom']) if 'nom' in df.columns else f"LIEU_{i}"
                 x = float(row['x'])
                 y = float(row['y'])
                 self.liste_lieux.append(LIEU(x, y, nom))
