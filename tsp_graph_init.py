@@ -26,6 +26,10 @@ class Route: # classe route qui représente un chemin dans le problème du voyag
         self.ordre.insert(0,0) # insérer le point de départ (indice 0) au début de la liste des lieux à visiter
         self.ordre.append(0) # insérer le point d'arrivée (indice 0) à la fin de la liste des lieux à visiter
 
+opérateur de comparaison __lt__ pour comparer deux routes en fonction de leur distance totale
+def __lt__(self, autre_route):
+    return self.distance_totale < autre_route.distance_totale
+__repr__ = __str__
 
 
 
