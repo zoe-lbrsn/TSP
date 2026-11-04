@@ -267,5 +267,4 @@ class Affichage:
         self.dessiner_lieux(liste_lieux)
 
         #on met à jour 
-        self.master.update()
-        
+        self.master.update()      
