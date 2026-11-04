@@ -9,9 +9,3 @@ class Route: # classe route qui représente un chemin dans le problème du voyag
         self.ordre.insert(0,0) # insérer le point de départ (indice 0) au début de la liste des lieux à visiter
         self.ordre.append(0) # insérer le point d'arrivée (indice 0) à la fin de la liste des lieux à visiter
 
-
-liste_lieux = ["A", "B", "C", "D", "E"] # test avec une liste de lieux (A, B, C, D, E)
-
-route = Route(liste_lieux)
-
-print(route.ordre)
