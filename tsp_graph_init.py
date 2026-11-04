@@ -53,10 +53,10 @@ class Graph:
 
     def generer_lieux_aleatoires(self, nb_lieux):
         """Génère aléatoirement des lieux dans le cadre (LARGEUR x HAUTEUR)."""
-        from tsp_graph_init import Lieu
+        from tsp_graph_init import LIEU
         marge = 40
         self.liste_lieux = [
-            Lieu(
+            LIEU(
                 random.uniform(marge, LARGEUR - marge),
                 random.uniform(marge, HAUTEUR - marge),
                 nom=f"Lieu_{i}"
@@ -73,8 +73,8 @@ class Graph:
         for i, lieu1 in enumerate(self.liste_lieux):
             for j, lieu2 in enumerate(self.liste_lieux):
                 if i != j:
-                    # Utilise la méthode distance_vers de la classe Lieu
-                    self.matrice_od[i, j] = lieu1.distance_vers(lieu2)
+                    # Utilise la méthode distances de la classe Lieu
+                    self.matrice_od[i, j] = lieu1.distance(lieu2)
         return self.matrice_od
 
     def plus_proche_voisin(self, idx_lieu, visites=None):
@@ -105,7 +105,7 @@ class Graph:
         Lit un fichier CSV contenant les coordonnées des lieux et met à jour
         la liste des lieux ainsi que la matrice de coût OD.
         """
-        from tsp_graph_init import Lieu
+        from tsp_graph_init import LIEU
         self.liste_lieux = []
         try:
             df = pd.read_csv(fichier_csv)
@@ -113,7 +113,7 @@ class Graph:
                 nom = str(row['nom']) if 'nom' in df.columns else f"Lieu_{i}"
                 x = float(row['x'])
                 y = float(row['y'])
-                self.liste_lieux.append(Lieu(x, y, nom))
+                self.liste_lieux.append(LIEU(x, y, nom))
             # Mise à jour de la matrice OD après le chargement
             self.calcul_matrice_cout_od()
         except Exception as e:
