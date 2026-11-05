@@ -15,7 +15,7 @@ if __name__ == "__main__":
     affichage = Affichage(root)
 
     # 3. Algorithme de colonie de fourmis
-    aco = TP_ACO(graphe, affichage, nb_iterations=100, rho=0.3)
+    aco = TP_ACO(graphe, affichage, nb_iterations=500, rho=0.3)
 
     # 4. Affichage de la solution du plus proche voisin
     aco.initialiser_plus_proche_voisin()

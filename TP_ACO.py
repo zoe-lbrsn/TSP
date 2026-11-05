@@ -43,10 +43,10 @@ class TP_ACO:
         self.affichage.mettre_a_jour_texte(0, self.meilleure_distance, 0)
         self.affichage.rafraichir(self.graph.liste_lieux, route.ordre)
 
-        
+
 
     def __init__(self, graph, affichage, nb_fourmis=None, alpha=1.0, beta=3.0,
-                 rho=0.1, Q=100.0, tau0=1.0, nb_iterations=200, pause=0.05):
+                 rho=0.1, Q=100.0, tau0=1.0, nb_iterations=200, pause=0.08):
     
         self.graph = graph                  # objet Graph (lieux + matrice des distances)
         self.affichage = affichage          # objet Affichage (fenêtre tkinter)
@@ -222,6 +222,19 @@ class TP_ACO:
                 # 4. Mise à jour de la fenêtre à chaque itération
                 self.mettre_a_jour_affichage(iteration)
                 time.sleep(self.pause)
+                # Arrêt si aucune amélioration depuis 100 itérations
+                if iteration - self.iteration_trouvee >= 500:
+                    break
+
+            # ----- Affichage final : seulement la meilleure route -----
+            self.affichage.afficher_details = False   # on cache les phéromones
+            self.affichage.mettre_a_jour_texte(
+                self.nb_iterations, self.meilleure_distance, self.iteration_trouvee
+            )
+            self.affichage.rafraichir(
+                self.graph.liste_lieux,
+                self.meilleure_route.ordre
+            )
 
         except tk.TclError:
             # La fenêtre a été fermée (touche Echap) : on arrête proprement

@@ -26,10 +26,6 @@ class Route: # classe route qui représente un chemin dans le problème du voyag
         self.ordre.insert(0,0) # insérer le point de départ (indice 0) au début de la liste des lieux à visiter
         self.ordre.append(0) # insérer le point d'arrivée (indice 0) à la fin de la liste des lieux à visiter
 
-opérateur de comparaison __lt__ pour comparer deux routes en fonction de leur distance totale
-def __lt__(self, autre_route):
-    return self.distance_totale < autre_route.distance_totale
-__repr__ = __str__
 
     
 
@@ -227,7 +223,7 @@ class Affichage:
                 l1.x, l1.y, l2.x, l2.y,
                 fill='purple',
                 width=2,
-                dash=(4, 2)  # ligne pointillée
+                #dash=(4, 2)  # ligne pointillée
             )
 
             #ordre de visite indiquée au dessus du lieu
@@ -235,7 +231,7 @@ class Affichage:
             if i < len(route_ordre) - 1:
                 self.canvas.create_text(
                     l1.x, l1.y -25,
-                    text=f"Ordre: {i}", fill="blue", font=('Arial', 9)
+                    text=f"Ordre: {i}", fill="black", font=('Arial', 8)
                 )
     
     
@@ -255,7 +251,7 @@ class Affichage:
                     l2 = liste_lieux[j]
 
                     # niveau entre 0 et 1 -> épaisseur entre 1 et 6
-                    epaisseur = max(1, int(niveau_pheromone * 6))
+                    epaisseur = max(1, int(niveau_pheromone * 8))
                     self.canvas.create_line(
                         l1.x, l1.y, l2.x, l2.y,
                         fill='lightgray',
