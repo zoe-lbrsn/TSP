@@ -1,3 +1,4 @@
+"""Le notre avant que Claude ne s'en mêle"""
 import time
 import random
 import csv
@@ -235,7 +236,7 @@ class TP_ACO:
     Algorithme d'optimisation par colonie de fourmis (ACO) pour le TSP.
     """
     def __init__(self, graph, affichage, nb_fourmis=None, alpha=1.0, beta=2.5,
-                 rho=0.08, Q=100.0, tau0=1.0, nb_iterations=300, pause=0.05):
+                 rho=0.06, Q=100.0, tau0=1.0, nb_iterations=300, pause=0.05):
 
         self.graph = graph
         self.affichage = affichage
@@ -418,7 +419,7 @@ def main():
     graphe = Graph()
     
     # Remarque : si tu as un fichier CSV (ex: graph_20.csv), tu peux le charger ici :
-    graphe.charger_graph("graph_70.csv")
+    graphe.charger_graph("graph_1000.csv")
 
     # 2. Initialisation de l'affichage Tkinter
     affichage = Affichage(root, group_name="6")
