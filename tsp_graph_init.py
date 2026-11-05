@@ -27,10 +27,6 @@ class Route: # classe route qui représente un chemin dans le problème du voyag
         self.ordre.append(0) # insérer le point d'arrivée (indice 0) à la fin de la liste des lieux à visiter
 
 
-    __lt__(self, other): # méthode pour comparer deux routes en fonction de leur distance totale
-
-    __repr__(self): # méthode pour représenter la route sous forme de chaîne de caractères
-
     
 
 
@@ -150,6 +146,9 @@ class Affichage:
         self.master = master
         self.master.title(f"TSP - Groupe {group_name}")
 
+        self.fourmis_lancees = False
+        
+
         self.canvas = tk.Canvas(self.master, width=LARGEUR, height=HAUTEUR, bg='white')
         self.canvas.pack()
 
@@ -165,7 +164,8 @@ class Affichage:
 
         #on écoute le clavier grace à bind
         self.master.bind('<Escape>', self.quitter) #touche "echap" pour quitter
-        self.master.bind('<m>', self.pheromones) #'m' pour matrice (espèce de bouffon)
+        self.master.bind('<m>', self.pheromones) #'m' pour matrice 
+        self.master.bind('<M>', self.pheromones)
     
 
     def quitter(self, event=None):
@@ -173,9 +173,13 @@ class Affichage:
         self.master.quit() #arrête la boucle principale de tkinter
     
     def pheromones(self, event=None):
-        #affiche ou désaffiche les détails des phéromones sur le graphe
-        self.afficher_details = not self.afficher_details
-        print("bascule affichage des détails des phéromones:", self.afficher_details) #faudra relancer un canva dans le main
+        # 1er appui sur M : on lance les fourmis (et on affiche les phéromones)
+        # appuis suivants : on masque / réaffiche les phéromones
+        if not self.fourmis_lancees:
+            self.fourmis_lancees = True
+            self.afficher_details = True
+        else:
+            self.afficher_details = not self.afficher_details
 
     def mettre_a_jour_texte(self, iteration, best_distance, iteration_trouvee):
         #mettre à jour le texte en bas de la fenêtre
@@ -231,7 +235,7 @@ class Affichage:
                 )
     
     
-    def dessiner_pheromones(self, matrice_pheromones, liste_lieux, seuil = 0.1):
+    def dessiner_pheromones(self, matrice_pheromones, liste_lieux, seuil = 0.2):
         #dessine la matrice des phéromones sous forme de lignes grises
         #L'épaisseur ou l'apparition de la ligne dépend de l'intensité des phéromones
 
@@ -246,8 +250,8 @@ class Affichage:
                     l1 = liste_lieux[i]
                     l2 = liste_lieux[j]
 
-                    #Plus il y a de phéromones, plus la ligne est épaisse
-                    epaisseur = int(min(5, max(1, niveau_pheromone * 100)))  # Limite l'épaisseur à 5
+                    # niveau entre 0 et 1 -> épaisseur entre 1 et 6
+                    epaisseur = max(1, int(niveau_pheromone * 6))
                     self.canvas.create_line(
                         l1.x, l1.y, l2.x, l2.y,
                         fill='lightgray',
