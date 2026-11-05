@@ -45,8 +45,8 @@ class TP_ACO:
 
 
 
-    def __init__(self, graph, affichage, nb_fourmis=None, alpha=1.0, beta=3.0,
-                 rho=0.1, Q=100.0, tau0=1.0, nb_iterations=200, pause=0.08):
+    def __init__(self, graph, affichage, nb_fourmis=None, alpha=1.0, beta=2.5,
+                 rho=0.08, Q=100.0, tau0=1.0, nb_iterations=300, pause=0.05):
     
         self.graph = graph                  # objet Graph (lieux + matrice des distances)
         self.affichage = affichage          # objet Affichage (fenêtre tkinter)

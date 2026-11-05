@@ -9,13 +9,13 @@ if __name__ == "__main__":
 
     # 1. Graphe chargé depuis le CSV
     graphe = Graph(liste_lieux=[])
-    graphe.charger_graph("graph_30.csv")
+    graphe.charger_graph("graph_70.csv")
 
     # 2. Fenêtre d'affichage
     affichage = Affichage(root)
 
     # 3. Algorithme de colonie de fourmis
-    aco = TP_ACO(graphe, affichage, nb_iterations=500, rho=0.3)
+    aco = TP_ACO(graphe, affichage, nb_iterations=300, rho=0.06)
 
     # 4. Affichage de la solution du plus proche voisin
     aco.initialiser_plus_proche_voisin()
