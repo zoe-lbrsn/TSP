@@ -1,15 +1,3 @@
-"""
-TSP par colonie de fourmis (ACO) - fichier unique.
-
-Contenu :
-  - Graph / Affichage      : villes, matrice des distances, fenêtre tkinter
-  - deux_opt               : 2-opt complet (nettoyage final de la route)
-  - deux_opt_voisins       : 2-opt rapide à listes de voisins
-  - TP_ACO                 : version séquentielle (un seul process, plus simple)
-  - TP_ACO_V2              : version parallèle (nb_processus=1 => séquentielle)
-
-Lancement : python tsp_complet.py   puis ESPACE pour démarrer, ESPACE pour afficher/cacher les phéromones.
-"""
 import random
 import multiprocessing as mp
 from multiprocessing import shared_memory
@@ -42,11 +30,10 @@ class Graph:
         # si on nous donne un csv, on le charge
         if fichier_csv:
             self.charger_graph(fichier_csv)
-        # si on n'a toujours aucune ville (pas de csv, ou csv illisible), on en tire au hasard
+        # si on n'a toujours aucune ville (pas de csv), on en tire au hasard
         if not self.liste_lieux:
             self.generer_lieux_aleatoires(NB_LIEUX)
-        # on calcule les distances une bonne fois pour toutes, ça évite de les recalculer
-        # des millions de fois dans l'algo
+        # on calcule les distances une fois 
         self.calcul_matrice_cout_od()
 
     def generer_lieux_aleatoires(self, nb_lieux):
@@ -63,7 +50,7 @@ class Graph:
         # tableau de taille n x 2 : une ligne (x, y) par ville
         self.coords = np.array([[l.x, l.y] for l in self.liste_lieux], dtype=float)
         # on soustrait les coordonnées de toutes les paires de villes d'un coup
-        # (le fameux broadcasting) : diff[i, j] = coords[i] - coords[j]
+        # broadcasting : diff[i, j] = coords[i] - coords[j]
         diff = self.coords[:, None, :] - self.coords[None, :, :]
         # Pythagore : racine de (dx² + dy²) pour chaque paire
         self.matrice_od = np.sqrt((diff ** 2).sum(axis=2))
@@ -78,7 +65,7 @@ class Graph:
                                 for x, y, n in zip(df['x'], df['y'], noms)]
             self.calcul_matrice_cout_od()
         except Exception as e:
-            # fichier absent, mauvaises colonnes... on prévient et on vide la liste,
+            #  on prévient et on vide la liste,
             # le constructeur prendra alors des villes au hasard
             print(f"Erreur lors du chargement du fichier CSV {fichier_csv} : {e}")
             self.liste_lieux = []
@@ -135,7 +122,7 @@ class Affichage:
         self.afficher_details = False    # True = on dessine aussi les phéromones
         self.calcul_en_cours = False     # True pendant que l'ACO tourne
         self._derniere_scene = None      # dernière image dessinée (pour la redessiner sur demande)
-        # raccourci clavier : Echap pour quitter (ESPACE est géré dans main)
+        #  Echap pour quitter (ESPACE est géré dans main)
         self.master.bind('<Escape>', self.quitter)
 
     def quitter(self, event=None):
@@ -145,8 +132,7 @@ class Affichage:
     def pheromones(self, event=None):
         # on inverse : affiché -> caché, caché -> affiché
         self.afficher_details = not self.afficher_details
-        # si l'algo est fini, plus personne ne redessine : on le fait nous-mêmes tout de suite
-        # (pendant le calcul, le prochain rafraichir() s'en charge)
+
         if not self.calcul_en_cours and self._derniere_scene is not None:
             self.rafraichir(*self._derniere_scene)
 
@@ -202,7 +188,7 @@ class Affichage:
         self.master.update()
 
 #  2-OPT vectorisé (pour chaque i, on teste tous les j d'un coup)
-# Idée : si deux arêtes du circuit se croisent, on peut raccourcir le circuit en les
+# si deux arêtes du circuit se croisent, on peut raccourcir le circuit en les
 # décroisant. Pour ça on remplace (a->b) et (c->d) par (a->c) et (b->d), ce qui revient
 # à retourner le morceau de circuit qui se trouve entre b et c.
 
@@ -238,9 +224,9 @@ def deux_opt(tour, D, max_passes=100):
     return tour
 
 class TP_ACO:
-    # version "tout dans un seul process" de l'algo de colonies de fourmis
+
     def __init__(self, graph, affichage, nb_fourmis=None, alpha=1.0, beta=3.0,
-                 rho=0.1, nb_iterations=300, two_opt=True, patience=100,
+                 rho=0.1, nb_iterations=500, two_opt=True, patience=200,
                  refresh_every=None, seed=None):
         # alpha = poids des phéromones, beta = poids de la proximité (visibilité)
         # rho = vitesse d'évaporation, patience = nb d'itérations sans progrès avant d'arrêter
@@ -249,7 +235,7 @@ class TP_ACO:
         self.D = graph.matrice_od
         self.n = len(graph.liste_lieux)
 
-        # Peu de fourmis suffisent (20-30) : le coût est proportionnel à leur nombre
+        # Peu de fourmis suffisent, le coût est proportionnel à leur nombre
         self.m = nb_fourmis if nb_fourmis is not None else min(self.n, 30)
         self.alpha = alpha
         self.rho = rho
@@ -260,15 +246,15 @@ class TP_ACO:
         self.refresh_every = refresh_every if refresh_every else (1 if self.n <= 200 else 5)
         self.rng = np.random.default_rng(seed)    # générateur aléatoire (seed fixe = résultats reproductibles)
 
-        # Visibilité beta précalculée une fois pour toutes
+        # Visibilité beta précalculée une seule fois
         # visibilité = 1 / distance : plus une ville est proche, plus elle attire
-        with np.errstate(divide='ignore'):    # la diagonale fait 1/0, on s'en occupe juste après
+        with np.errstate(divide='ignore'): 
             eta = 1.0 / self.D
         np.fill_diagonal(eta, 0.0)
         self.eta_beta = eta ** beta
 
         # Solution initiale : plus proche voisin (+ 2-opt)
-        # ça nous donne un premier "record" correct avant même de lâcher les fourmis
+        # ça nous donne un premier "record" correct avant les fourmis
         tour = graph.plus_proche_voisin_tour(0)
         if self.two_opt:
             tour = deux_opt(tour, self.D)
@@ -282,8 +268,8 @@ class TP_ACO:
 
     def _maj_bornes(self):
         # MAX-MIN : on borne les phéromones entre tau_min et tau_max
-        # - sans max, une arête pourrait prendre toute la place et bloquer l'exploration
-        # - sans min, une arête pourrait tomber à 0 et ne plus jamais être essayée
+        #  sans max, une arête pourrait prendre toute la place et bloquer l'exploration
+        #  sans min, une arête pourrait tomber à 0 et ne plus jamais être essayée
         # tau_max est la valeur vers laquelle tend une arête renforcée à chaque itération
         self.tau_max = 1.0 / (self.rho * self.meilleure_distance)
         self.tau_min = self.tau_max / (2.0 * self.n)
@@ -297,7 +283,7 @@ class TP_ACO:
         libre = np.ones((m, n), dtype=bool)         # villes pas encore visitées, par fourmi
         lignes = np.arange(m)
 
-        # chaque fourmi démarre dans une ville au hasard (le circuit est cyclique, ça ne change rien)
+        # chaque fourmi démarre dans une ville au hasard
         cur = self.rng.integers(0, n, size=m)
         tours[:, 0] = cur
         libre[lignes, cur] = False
@@ -331,18 +317,18 @@ class TP_ACO:
         iteration = 0
         try:
             for iteration in range(1, self.nb_iterations + 1):
-                # 1) les fourmis construisent leurs circuits et on mesure leurs longueurs
+                # les fourmis construisent leurs circuits et on mesure leurs longueurs
                 tours = self.construire_tours()
                 longueurs = self.D[tours, np.roll(tours, -1, axis=1)].sum(axis=1)
 
-                # 2) on garde la meilleure fourmi de cette itération et on lui passe le 2-opt
+                # on garde la meilleure fourmi de cette itération et on lui passe le 2-opt
                 ib = int(longueurs.argmin())
                 tour_ib = tours[ib]
                 if self.two_opt:
                     tour_ib = deux_opt(tour_ib, self.D)
                 dist_ib = self.graph.longueur_tour(tour_ib)
 
-                # 3) si c'est mieux que le record, elle devient le nouveau record
+                # si c'est mieux que le record, elle devient le nouveau record
                 if dist_ib < self.meilleure_distance - 1e-9:
                     self.meilleure_distance = dist_ib
                     self.meilleur_tour = tour_ib
@@ -353,9 +339,9 @@ class TP_ACO:
                     sans_amelioration += 1
 
                 # Évaporation + dépôt de la seule meilleure fourmi (alternance itération / globale)
-                # 4) évaporation : toutes les phéromones perdent rho % (10 % ici)
+                # évaporation : toutes les phéromones perdent rho %
                 self.tau *= (1.0 - self.rho)
-                # 5) dépôt : 4 itérations sur 5 c'est la meilleure de l'itération qui dépose,
+                # dépôt : 4 itérations sur 5 c'est la meilleure de l'itération qui dépose,
                 # la 5e fois c'est le record global (compromis exploration / exploitation)
                 ref, d_ref = ((self.meilleur_tour, self.meilleure_distance)
                               if iteration % 5 == 0 else (tour_ib, dist_ib))
@@ -363,7 +349,7 @@ class TP_ACO:
                 depot = 1.0 / d_ref             # circuit court = gros dépôt
                 self.tau[a, b] += depot
                 self.tau[b, a] += depot         # dans les deux sens, la matrice est symétrique
-                # 6) on remet les valeurs dans les bornes min / max
+                # on remet les valeurs dans les bornes min / max
                 np.clip(self.tau, self.tau_min, self.tau_max, out=self.tau)
 
                 # Relance des phéromones si stagnation
@@ -395,13 +381,12 @@ def calculer_voisins(coords, D, k):
     n = len(coords)
     k = min(k, n - 1)
     try:
-        # si scipy est installé, on utilise un KD-tree : c'est fait pour ce genre de recherche
+
         from scipy.spatial import cKDTree
         _, idx = cKDTree(coords).query(coords, k=k + 1)
         return idx[:, 1:].astype(np.int64)    # on enlève la ville elle-même
     except ImportError:
-        # sinon on se débrouille avec la matrice des distances
-        # (on met l'infini sur la diagonale pour qu'une ville ne soit pas son propre voisin)
+
         M = D + np.diag(np.full(n, np.inf))
         idx = np.argpartition(M, k - 1, axis=1)[:, :k]    # les k plus petits, mais pas triés
         ordre = np.argsort(np.take_along_axis(M, idx, axis=1), axis=1)    # on les trie
@@ -409,11 +394,7 @@ def calculer_voisins(coords, D, k):
 
 
 def deux_opt_voisins(tour, D, cand, max_passes=50):
-    # même principe que le 2-opt de l'autre fichier (décroiser les arêtes), mais au lieu
-    # de tester les n villes pour la 2e arête, on teste seulement les ~15 voisins de a.
-    # On regarde les DEUX arêtes de a (vers la ville suivante ET vers la précédente) :
-    # avec un seul sens, des croisements restaient dans le circuit final.
-    """2-opt restreint aux voisins proches, avec don't-look bits, dans les DEUX sens."""
+
     tour = tour.copy()
     n = len(tour)
     if n < 5:
@@ -482,7 +463,6 @@ def _travail(args):
     choix = (_G["tau"] ** _G["alpha"]) * _G["eb"]    # envie d'aller de i à j (phéromones * visibilité)
 
     # les nb fourmis du processus avancent en même temps, ville par ville
-    # (même code que construire_tours dans l'autre fichier)
     tours = np.empty((nb, n), dtype=np.int64)
     libre = np.ones((nb, n), dtype=bool)
     lignes = np.arange(nb)
@@ -493,21 +473,21 @@ def _travail(args):
         w = (choix[cur] + 1e-300) * libre    # poids, 0 sur les villes déjà visitées
         cum = np.cumsum(w, axis=1)
         seuil = (1.0 - rng.random(nb)) * cum[:, -1]
-        cur = (cum < seuil[:, None]).sum(axis=1)    # tirage à la roulette
+        cur = (cum < seuil[:, None]).sum(axis=1)    
         tours[:, k] = cur
         libre[lignes, cur] = False
 
     # on ne renvoie que la meilleure fourmi de ce processus
     longueurs = D[tours, np.roll(tours, -1, axis=1)].sum(axis=1)
     tour = tours[int(longueurs.argmin())]
-    if faire_2opt:    # le 2-opt n'est pas fait à toutes les itérations (voir two_opt_every)
+    if faire_2opt:   
         tour = deux_opt_voisins(tour, D, _G["cand"])
     return tour, float(D[tour, np.roll(tour, -1)].sum())
 
 
 
 class TP_ACO_V2:
-    # même algo que TP_ACO, mais les fourmis sont réparties entre plusieurs processus
+    # les fourmis sont réparties entre plusieurs processus
     # (un par coeur) : chacun construit ses fourmis en parallèle des autres
     def __init__(self, graph, affichage, nb_processus=4, fourmis_par_proc=8,
                  alpha=1.0, beta=3.0, rho=0.1, nb_iterations=300,
@@ -520,8 +500,11 @@ class TP_ACO_V2:
         self.affichage = affichage
         self.D = graph.matrice_od
         self.n = len(graph.liste_lieux)
-        self.P = max(1, nb_processus)
-        self.fpp = fourmis_par_proc
+        # nombre de fourmis adapté à la taille du graphe (jamais plus de fourmis que de villes)
+        total = min(self.n, max(1, nb_processus) * fourmis_par_proc)
+        # en dessous de 100 villes, lancer des processus coûte plus cher que ça ne rapporte
+        self.P = 1 if self.n < 100 else max(1, min(nb_processus, total))
+        self.fpp = max(1, total // self.P)    # fourmis par processus
         self.alpha, self.rho = alpha, rho
         self.nb_iterations = nb_iterations
         self.two_opt_every = max(1, two_opt_every)
@@ -564,14 +547,12 @@ class TP_ACO_V2:
 
         nD, _ = partager(self.D)
         nE, _ = partager(self.eta_beta)
-        # self.tau devient une "vue" sur la mémoire partagée : quand on modifie les
-        # phéromones ici, les processus voient directement le changement
+        #  quand on modifie les phéromones ici, les processus voient directement le changement
         nT, self.tau = partager(self.tau)
         return nD, nE, nT
 
     def _liberer(self):
-        # à appeler à la fin : on ramène tau dans de la mémoire normale puis on libère
-        # la mémoire partagée (sinon elle reste réservée même après la fin du programme)
+
         self.tau = np.array(self.tau)
         _G.clear()
         for shm in self._shms:
@@ -600,16 +581,15 @@ class TP_ACO_V2:
             pool = mp.Pool(self.P, initializer=_init_worker, initargs=initargs)
             executer = pool.map
         else:
-            # avec 1 seul processus on n'a pas besoin de pool : on fait le calcul ici directement
+            # avec 1 seul processus on fait le calcul ici directement
             # (pratique pour comparer 1 coeur contre 4 avec exactement le même code)
-            _init_worker(*initargs)                  # mode séquentiel : même code, même process
+            _init_worker(*initargs) 
             executer = lambda f, taches: list(map(f, taches))
 
         sans_amelioration = 0    # nb d'itérations de suite sans nouveau record
         iteration = 0
         try:
             for iteration in range(1, self.nb_iterations + 1):
-                # le 2-opt n'est fait qu'aux itérations 1, 4, 7, 10... (si two_opt_every = 3)
                 faire_2opt = (iteration - 1) % self.two_opt_every == 0
                 # une graine aléatoire différente par processus
                 graines = self.rng.integers(0, 2**32 - 1, size=self.P)
@@ -651,7 +631,7 @@ class TP_ACO_V2:
                 if iteration % self.refresh_every == 0:
                     self.mettre_a_jour_affichage(iteration)
 
-            # nettoyage final : un 2-opt COMPLET (1 seule fois, très rapide) garantit
+            # nettoyage final : un 2-opt complet (1 seule fois, très rapide) garantit
             # qu'il ne reste aucun croisement dans la route finale
             tour_final = deux_opt(self.meilleur_tour, self.D)
             dist_finale = self.graph.longueur_tour(tour_final)
@@ -676,7 +656,7 @@ class TP_ACO_V2:
 
 def main():
     root = tk.Tk()
-    graphe = Graph(fichier_csv="graph_1000.csv")
+    graphe = Graph(fichier_csv="graph_150.csv")
     affichage = Affichage(root, group_name="6")
 
     # on affiche d'abord la solution "plus proche voisin" comme point de comparaison
@@ -689,7 +669,7 @@ def main():
     def demarrer_aco(event=None):
         affichage.calcul_en_cours = True
         solveur = TP_ACO_V2(graph=graphe, affichage=affichage,
-                            nb_processus=4,          # <- mets 1 pour comparer en séquentiel
+                            nb_processus=4,       
                             fourmis_par_proc=8,
                             two_opt_every=3,
                             nb_iterations=300)
@@ -699,7 +679,7 @@ def main():
         print(f"Circuit final : départ {route[0]}, arrivée {route[-1]}, {len(route) - 1} villes visitées")
         affichage.info_label.config(
             text=f"ACO terminé ! Distance finale : {meilleure_dist:.2f} px (Heuristique : {dist_nn:.2f} px) "
-                 f" \n Meilleure itération : {solveur.iteration_trouvee} \n [ESPACE] : Phéromones | [ESC] : Quitter ")
+                 f" \n  [ESC] : Quitter ")
 
     # 1er appui sur ESPACE : on lance l'algo. Ensuite : chaque appui affiche / cache les phéromones
     lance = [False]
